@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 
-type Props = {}
+type Props = {
+  /** SDPに付与するストリーム */
+  stream: MediaStream | null;
+}
 
-const Sdp: React.FC<Props> = () => {
-
+const Sdp: React.FC<Props> = (props: Props) => {
+  const { stream } = props;
   const [sdpTxt, setSdpTxt] = useState<string>('');
 
+  /**
+   * RTCPeerConnectionのインスタンスを生成
+   */
   const makeConnection = () => {
-    const pc_config = { iceServers: [] };
-    let peer = null;
+    const pcConfig = { iceServers: [] };
     try {
-      peer = new RTCPeerConnection(pc_config);
+      const peer = new RTCPeerConnection(pcConfig);
       peer.onicecandidate = (e) => {
         if (e.candidate) {
           console.log(e.candidate);
@@ -18,18 +23,27 @@ const Sdp: React.FC<Props> = () => {
           console.log(e);
         }
       }
+      // ストリームをRTCPeerConnectionに追加
+      if (stream) {
+        stream.getTracks().forEach(track => {
+          peer.addTrack(track);
+        });
+      }
+      return peer;
     } catch (e) {
-      console.error(`Failed to create peerConnection:${e}`);
+      console.error(`Failed to create peerConnection: ${e}`);
     }
-    return peer;
+    return null;
   }
 
+  /**
+   * Offer SDPを生成
+   */
   const makeSdp = async () => {
     const peerConnection = makeConnection();
     if (peerConnection) {
       const offer = await peerConnection.createOffer();
-      const sdpTemp = JSON.stringify(offer);
-      setSdpTxt(sdpTemp);
+      setSdpTxt(JSON.stringify(offer));
     }
 
   }

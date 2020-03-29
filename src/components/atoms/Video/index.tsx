@@ -1,43 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 type Props = {
   width: number;
   height: number;
+  setStream: (stream: MediaStream) => void;
 }
 
-class Video extends React.Component<Props> {
+export const useDidMount = (func: Function) => useEffect(() => { func() }, []);
 
-  ref: React.RefObject<HTMLVideoElement>;
+const Video: React.FC<Props> = (props: Props) => {
+  const { width, height, setStream } = props;
 
-  constructor(props:Props) {
-    super(props);
-    this.ref = React.createRef<HTMLVideoElement>();
-  }
+  useDidMount(async () => {
+    const mySteram = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    const elm = document.getElementById("player") as HTMLVideoElement;
+    if (elm) {
+      elm.srcObject = mySteram;
+    }
+    setStream(mySteram);
+  });
 
-  componentDidMount() {
-    const { ref } = this;
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then(stream => {
-        if (ref !== null && ref.current !== null) {
-          ref.current.srcObject = stream
-        }
-      })
-      .catch(console.log)
-  }
-
-  render() {
-    const { width, height } = this.props;
-    return (
-      <video
-        width={width}
-        height={height}
-        controls
-        autoPlay={true}
-        playsInline={true} // インライン再生（iPhone用）
-        ref={this.ref}
-      />
-    );
-  }
+  return (
+    <video
+      id="player"
+      width={width}
+      height={height}
+      controls
+      autoPlay={true}
+      playsInline={true} // インライン再生（iPhone用）
+    />
+  );
 }
 
 export default Video;
