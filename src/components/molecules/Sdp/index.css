@@ -1,0 +1,11 @@
+.sdp-area {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.sdp-area textarea {
+  height: 100px;
+}
+.sdp-area textarea:read-only {
+  background-color: #CCC;
+}
