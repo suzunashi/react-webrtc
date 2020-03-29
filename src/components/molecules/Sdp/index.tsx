@@ -4,12 +4,13 @@ import './index.css';
 type Props = {
   /** SDPに付与するストリーム */
   stream: MediaStream | null;
-  /** SDP生成を有効にする */
-  isEnable: boolean;
 }
 
 const Sdp: React.FC<Props> = (props: Props) => {
-  const { stream, isEnable } = props;
+  const { stream } = props;
+
+  // 自分のRTCPeerConnection
+  const [peer, setPeer] = useState<RTCPeerConnection>();
 
   // オファーSDPのテキスト表示
   const [offerSdpTxt, setOfferSdpTxt] = useState<string>('');
@@ -22,8 +23,8 @@ const Sdp: React.FC<Props> = (props: Props) => {
   const makeConnection = () => {
     const pcConfig = { iceServers: [] };
     try {
-      const peer = new RTCPeerConnection(pcConfig);
-      peer.onicecandidate = (e) => {
+      const peerConnection = new RTCPeerConnection(pcConfig);
+      peerConnection.onicecandidate = (e) => {
         if (e.candidate) {
           console.log(e.candidate);
         } else {
@@ -33,10 +34,10 @@ const Sdp: React.FC<Props> = (props: Props) => {
       // ストリームをRTCPeerConnectionに追加
       if (stream) {
         stream.getTracks().forEach(track => {
-          peer.addTrack(track);
+          peerConnection.addTrack(track);
         });
       }
-      return peer;
+      return peerConnection;
     } catch (e) {
       console.error(`Failed to create peerConnection: ${e}`);
     }
@@ -53,8 +54,9 @@ const Sdp: React.FC<Props> = (props: Props) => {
       peerConnection.setLocalDescription(offer);
       // setOfferSdpTxt((JSON.stringify(offer)).replace(/\\r\\n/g, '\n'));
       setOfferSdpTxt(JSON.stringify(offer));
+      console.log('登録', peerConnection);
+      setPeer(peerConnection);
     }
-
   }
 
   /**
@@ -79,13 +81,31 @@ const Sdp: React.FC<Props> = (props: Props) => {
     }
   }
 
+  const setAnswerSdp = () => {
+    if (!peer) {
+      alert('自分のPeerConnectionが登録されていません');
+    }
+
+    if (answerSdpTxt.length <= 0) {
+      alert('アンサーSDPを入力してください');
+      return;
+    }
+    if (peer) {
+      peer.setRemoteDescription(JSON.parse(answerSdpTxt));
+      setPeer(peer);
+      console.error('登録', peer);
+
+    }
+  }
+
   return (
     <div className="sdp-area">
-      <button onClick={makeOfferSdp} disabled={isEnable}>オファーSDP生成</button>
-      <textarea defaultValue={offerSdpTxt} readOnly={!isEnable} onChange={!isEnable ? () => { } : (e) => { setOfferSdpTxt(e.target.value) }} />
+      <button onClick={makeOfferSdp}>オファーSDP生成</button>
+      <textarea defaultValue={offerSdpTxt} onChange={e => setAnswerSdpTxt(JSON.stringify(e.target.value))} />
       <hr />
-      <button onClick={makeAnswerSdp} disabled={!isEnable}>アンサーSDP生成</button>
-      <textarea defaultValue={answerSdpTxt} readOnly={isEnable} onChange={isEnable ? () => { } : (e) => { setAnswerSdpTxt(e.target.value) }} />
+      <button onClick={makeAnswerSdp}>アンサーSDP生成</button>
+      <textarea defaultValue={answerSdpTxt} onChange={e=> setAnswerSdpTxt(JSON.stringify(e.target.value))}/>
+      <button onClick={setAnswerSdp}>アンサーSDP登録</button>
     </div>
   );
 }

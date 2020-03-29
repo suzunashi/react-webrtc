@@ -25,10 +25,6 @@ const App: React.FC<AppProps> = (props: AppProps) => {
             width={400}
             height={300}
           />
-          <Sdp
-            stream={localStream}
-            isEnable={false}
-          />
         </div>
         <div className="video-col">
           <Video
@@ -36,14 +32,11 @@ const App: React.FC<AppProps> = (props: AppProps) => {
             width={400}
             height={300}
           />
-          <Sdp
-            stream={localStream}
-            isEnable={true}
-          />
         </div>
       </div>
-
-
+      <Sdp
+        stream={localStream}
+      />
     </div>
   );
 }
