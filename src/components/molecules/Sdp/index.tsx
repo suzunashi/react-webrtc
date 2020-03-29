@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './index.css';
 
 type Props = {
@@ -6,16 +6,24 @@ type Props = {
   stream: MediaStream | null;
 }
 
+interface IceCandidate {
+  type: string,
+  sdpMLineIndex: any,
+  sdpMid: any,
+  candidate: any
+}
+
 const Sdp: React.FC<Props> = (props: Props) => {
   const { stream } = props;
 
   // 自分のRTCPeerConnection
   const [peer, setPeer] = useState<RTCPeerConnection>();
-
   // オファーSDPのテキスト表示
   const [offerSdpTxt, setOfferSdpTxt] = useState<string>('');
   // アンサーSDPのテキスト表示
   const [answerSdpTxt, setAnswerSdpTxt] = useState<string>('');
+  // ICEcandidate
+  const [iceCandidates, setIceCandidates] = useState<IceCandidate[]>([]);
 
   /**
    * RTCPeerConnectionのインスタンスを生成
@@ -26,7 +34,21 @@ const Sdp: React.FC<Props> = (props: Props) => {
       const peerConnection = new RTCPeerConnection(pcConfig);
       peerConnection.onicecandidate = (e) => {
         if (e.candidate) {
-          console.log(e.candidate);
+          const candidate = {
+            type: 'candidate',
+            sdpMLineIndex: e.candidate.sdpMLineIndex,
+            sdpMid: e.candidate.sdpMid,
+            candidate: e.candidate.candidate
+          }
+          console.log('おいおい', iceCandidates);
+          iceCandidates.push(candidate);
+          setIceCandidates(iceCandidates);
+          let iceText = '';
+          iceCandidates.forEach(candidate => iceText += JSON.stringify(candidate));
+          const elm = document.getElementById('icecandidates') as HTMLTextAreaElement;
+          if (elm) {
+            elm.value = iceText;
+          }
         } else {
           console.log(e);
         }
@@ -54,7 +76,6 @@ const Sdp: React.FC<Props> = (props: Props) => {
       peerConnection.setLocalDescription(offer);
       // setOfferSdpTxt((JSON.stringify(offer)).replace(/\\r\\n/g, '\n'));
       setOfferSdpTxt(JSON.stringify(offer));
-      console.log('登録', peerConnection);
       setPeer(peerConnection);
     }
   }
@@ -71,7 +92,8 @@ const Sdp: React.FC<Props> = (props: Props) => {
     const peerConnection = makeConnection();
     if (peerConnection) {
       // 相手のSDPをリモートとして登録
-      peerConnection.setRemoteDescription(JSON.parse(offerSdpTxt));
+      const offerSdp = document.getElementById("offer-sdp") as HTMLTextAreaElement;
+      peerConnection.setRemoteDescription(JSON.parse(offerSdp.value));
       // アンサーSDPを生成
       const answerSdp = await peerConnection.createAnswer();
       // 自分のアンサーSDPをローカルとして登録
@@ -93,20 +115,26 @@ const Sdp: React.FC<Props> = (props: Props) => {
     if (peer) {
       peer.setRemoteDescription(JSON.parse(answerSdpTxt));
       setPeer(peer);
-      console.error('登録', peer);
-
     }
   }
 
   return (
-    <div className="sdp-area">
-      <button onClick={makeOfferSdp}>オファーSDP生成</button>
-      <textarea defaultValue={offerSdpTxt} onChange={e => setAnswerSdpTxt(JSON.stringify(e.target.value))} />
+    <>
+      <div className="sdp-area">
+        <button onClick={makeOfferSdp}>オファーSDP生成</button>
+        <textarea id="offer-sdp" defaultValue={offerSdpTxt} onChange={e => setOfferSdpTxt(JSON.stringify(e.target.value))} />
+        <hr />
+        <button onClick={makeAnswerSdp}>アンサーSDP生成</button>
+        <textarea defaultValue={answerSdpTxt} onChange={e=> setAnswerSdpTxt(JSON.stringify(e.target.value))}/>
+        <button onClick={setAnswerSdp}>アンサーSDP登録</button>
+      </div>
       <hr />
-      <button onClick={makeAnswerSdp}>アンサーSDP生成</button>
-      <textarea defaultValue={answerSdpTxt} onChange={e=> setAnswerSdpTxt(JSON.stringify(e.target.value))}/>
-      <button onClick={setAnswerSdp}>アンサーSDP登録</button>
-    </div>
+      <div className="sdp-area">
+        <span>ICE Canididate一覧</span>
+        <textarea id="icecandidates" />
+        <hr />
+      </div>
+    </>
   );
 }
 
