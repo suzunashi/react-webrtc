@@ -1,24 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 type Props = {
   width: number;
   height: number;
   stream: MediaStream | null;
 }
-
-const RemoteVideo: React.FC<Props> = (props: Props) => {
+const Video: React.FC<Props> = (props: Props) => {
   const { width, height, stream } = props;
+  const videoElm = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
-    const elm = document.getElementById("remoteVideo") as HTMLVideoElement;
-    if (elm && stream) {
-      elm.srcObject = stream;
+    if (videoElm.current !== null) {
+      videoElm.current.srcObject = stream;
     }
   }, [stream]);
 
   return (
     <video
-      id="remoteVideo"
+      ref={videoElm}
       width={width}
       height={height}
       controls
@@ -29,4 +28,4 @@ const RemoteVideo: React.FC<Props> = (props: Props) => {
   );
 }
 
-export default RemoteVideo;
+export default Video;

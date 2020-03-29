@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './index.css';
-import Video from '../../atoms/LocalVideo';
-import RemoteVideo from '../../atoms/RemoteVideo';
+import Video from '../../atoms/Video';
 import Sdp from '../../molecules/Sdp';
 import { WebRtcState } from '../../../states';
 import { AppActions } from '../../../containers/App';
@@ -11,6 +10,18 @@ type AppProps = OwnProps & WebRtcState & AppActions;
 
 const App: React.FC<AppProps> = (props: AppProps) => {
   const { localStream, remoteStream, setLocalStream, setRemoteStream } = props;
+
+  useEffect(() => {
+    const f = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      setLocalStream(stream);
+      // カメラ一覧を選択
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      // setCameraDevices(videoDevices);
+    };
+    f();
+  }, []);
 
   return (
     <div className="App">
@@ -22,14 +33,13 @@ const App: React.FC<AppProps> = (props: AppProps) => {
       <div className="video-area">
         <div className="video-col">
           <Video
-            localStream={localStream}
-            setStream={setLocalStream}
+            stream={localStream}
             width={400}
             height={300}
           />
         </div>
         <div className="video-col">
-          <RemoteVideo
+          <Video
             stream={remoteStream}
             width={400}
             height={300}
