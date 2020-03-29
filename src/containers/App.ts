@@ -6,16 +6,18 @@ import { webrtcActions } from '../actions';
 import App from '../components/pages/App';
 
 export interface AppActions {
-  setLocalStream: (localStream:MediaStream) => Action<any>;
+  setLocalStream: (localStream: MediaStream) => Action<MediaStream>;
+  setRemoteStream: (remoteStream: MediaStream) => Action<MediaStream>;
 }
 
 function mapStateToProps(appState: AppState) {
   return Object.assign({}, appState.webrtc);
 }
 
-function mapDispatchToProps(dispatch: Dispatch<Action<any>>) {
+function mapDispatchToProps(dispatch: Dispatch<Action<MediaStream>>) {
   return {
-    setLocalStream: (localStream: MediaStream) => dispatch(webrtcActions.setLocalStream(localStream))
+    setLocalStream: (localStream: MediaStream) => dispatch(webrtcActions.setLocalStream(localStream)),
+    setRemoteStream: (remoteStream: MediaStream) => dispatch(webrtcActions.setRemoteStream(remoteStream))
   }
 }
 

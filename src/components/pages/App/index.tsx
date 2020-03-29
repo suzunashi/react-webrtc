@@ -17,14 +17,33 @@ const App: React.FC<AppProps> = (props: AppProps) => {
         React + WebRTC
       </header>
       <p>カメラとマイクにアクセスし映像を表示する</p>
-      <Video
-        setStream={setLocalStream}
-        width={640}
-        height={480}
-      />
-      <Sdp
-        stream={localStream}
-      />
+
+      <div className="video-area">
+        <div className="video-col">
+          <Video
+            setStream={setLocalStream}
+            width={400}
+            height={300}
+          />
+          <Sdp
+            stream={localStream}
+            isEnable={false}
+          />
+        </div>
+        <div className="video-col">
+          <Video
+            setStream={setLocalStream}
+            width={400}
+            height={300}
+          />
+          <Sdp
+            stream={localStream}
+            isEnable={true}
+          />
+        </div>
+      </div>
+
+
     </div>
   );
 }
