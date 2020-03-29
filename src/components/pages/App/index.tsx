@@ -1,6 +1,7 @@
 import React from 'react';
 import './index.css';
-import Video from '../../atoms/Video';
+import Video from '../../atoms/LocalVideo';
+import RemoteVideo from '../../atoms/RemoteVideo';
 import Sdp from '../../molecules/Sdp';
 import { WebRtcState } from '../../../states';
 import { AppActions } from '../../../containers/App';
@@ -9,7 +10,7 @@ interface OwnProps { }
 type AppProps = OwnProps & WebRtcState & AppActions;
 
 const App: React.FC<AppProps> = (props: AppProps) => {
-  const { localStream, setLocalStream } = props;
+  const { localStream, remoteStream, setLocalStream, setRemoteStream } = props;
 
   return (
     <div className="App">
@@ -21,14 +22,15 @@ const App: React.FC<AppProps> = (props: AppProps) => {
       <div className="video-area">
         <div className="video-col">
           <Video
+            localStream={localStream}
             setStream={setLocalStream}
             width={400}
             height={300}
           />
         </div>
         <div className="video-col">
-          <Video
-            setStream={setLocalStream}
+          <RemoteVideo
+            stream={remoteStream}
             width={400}
             height={300}
           />
@@ -36,6 +38,7 @@ const App: React.FC<AppProps> = (props: AppProps) => {
       </div>
       <Sdp
         stream={localStream}
+        setRemoteStream={setRemoteStream}
       />
     </div>
   );
