@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import Video from './components/atoms/Video';
+import Sdp from './components/molecules/Sdp';
 
 const App: React.FC = () => {
   return (
@@ -12,7 +13,8 @@ const App: React.FC = () => {
       <Video
         width={640}
         height={480}
-        />
+      />
+      <Sdp />
     </div>
   );
 }
