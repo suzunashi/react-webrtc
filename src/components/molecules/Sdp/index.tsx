@@ -7,6 +7,8 @@ type Props = {
 
 const Sdp: React.FC<Props> = (props: Props) => {
   const { stream } = props;
+
+  // SDPのテキスト表示
   const [sdpTxt, setSdpTxt] = useState<string>('');
 
   /**
@@ -43,7 +45,8 @@ const Sdp: React.FC<Props> = (props: Props) => {
     const peerConnection = makeConnection();
     if (peerConnection) {
       const offer = await peerConnection.createOffer();
-      setSdpTxt(JSON.stringify(offer));
+      peerConnection.setLocalDescription(offer);
+      setSdpTxt((JSON.stringify(offer)).replace(/\\r\\n/g,'\n'));
     }
 
   }

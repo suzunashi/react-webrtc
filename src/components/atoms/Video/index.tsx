@@ -12,7 +12,7 @@ const Video: React.FC<Props> = (props: Props) => {
   const { width, height, setStream } = props;
 
   useDidMount(async () => {
-    const mySteram = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    const mySteram = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     const elm = document.getElementById("player") as HTMLVideoElement;
     if (elm) {
       elm.srcObject = mySteram;
@@ -28,6 +28,7 @@ const Video: React.FC<Props> = (props: Props) => {
       controls
       autoPlay={true}
       playsInline={true} // インライン再生（iPhone用）
+      muted={true} // 無音
     />
   );
 }
