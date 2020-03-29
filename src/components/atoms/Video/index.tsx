@@ -33,7 +33,7 @@ class Video extends React.Component<Props> {
         height={height}
         controls
         autoPlay={true}
-        playsinline={true} // インライン再生（iPhone用）
+        playsInline={true} // インライン再生（iPhone用）
         ref={this.ref}
       />
     );
