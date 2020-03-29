@@ -1,5 +1,5 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { webrtcActions } from '../actions';
+import { webrtcActions } from '../actions/webrtc';
 
 export interface WebRtcState {
   localStream: MediaStream | null;
